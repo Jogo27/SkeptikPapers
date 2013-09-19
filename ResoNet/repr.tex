@@ -1,0 +1,303 @@
+\documentclass{article}
+
+\usepackage{mathtools,amssymb,amsthm}
+
+\newtheorem{claim}{Claim}
+
+\newcommand{\parts}[1]{2^{#1}}
+\newcommand{\card}[1]{\left| #1 \right|}
+\newcommand{\ens}[2]{\left\{ #1 ~ \middle| ~ #2 \right\}}
+
+%TODO: remove unused commands
+\newcommand{\varSet}{\mathcal{V}}
+\newcommand{\axiomSet}{\mathcal{A}}
+\newcommand{\conSet}{\mathcal{C}}
+\newcommand{\resoSet}{\mathcal{R}}
+\newcommand{\resoNet}{\rho}
+\newcommand{\resoOrd}{\prec}
+\newcommand{\constep}[1]{\overset{#1}{\smile}}
+\newcommand{\connected}{\sim}
+\newcommand{\cpath}[2]{\left[ #1 \connected #2 \right]}
+\newcommand{\conwith}[2]{\prescript{#1}{}{\connected}^{#2}}
+\newcommand{\cpathwith}[4]{\left[ #1 \conwith{#2}{#3} #4 \right]}
+
+\newcommand{\Proof}{\varphi}
+\newcommand{\node}{\eta}
+\newcommand{\conc}[1]{C\left(#1\right)}
+\newcommand{\dual}[1]{\overline{#1}}
+\newcommand{\nreach}[3]{#1 \overset{#2}{\nrightarrow} #3}
+\newcommand{\treach}[3]{#1 \twoheadrightarrow^{#2} #3}
+
+\newcommand{\reso}[1]{\odot_{#1}}
+\newcommand{\transition}[1]{\xrightarrow{#1}}
+\newcommand{\ncon}[3]{M_{#3} \left( #1 , #2 \right)}
+
+
+\begin{document}
+
+\section{Totally shrinkable resolution networks}
+
+Let $\varSet$ be a finite set of variables.
+
+A set $\axiomSet$ of axioms on a set $\varSet$ of variables is a relation between parts of $\varSet$,
+ie $\axiomSet \subseteq \parts{\varSet} \times \parts{\varSet}$. In the following it is assumed that
+\begin{gather}
+  \left(\Gamma, \Delta \right) \in \axiomSet \Rightarrow \Gamma \cap \Delta = \varnothing \\
+  (\varnothing, \varnothing) \notin \axiomSet
+\end{gather}
+
+A set $\conSet_L$ of left contractions on a set $\axiomSet$ of axioms on $\varSet$ is a relation
+between parts of $\axiomSet$ and $\varSet$, ie $\conSet_L \subseteq \parts{\axiomSet} \times
+\varSet$, such that
+\begin{gather}
+  \forall (C_L,\ell) \in \conSet_L ,~ (\Gamma, \Delta) \in C_L \Rightarrow \ell \in \Gamma
+    \label{cond:ell_in_left} %\\
+%  \forall (C_L,\ell),(C'_L,\ell') \in \conSet_L ,~
+%    \ell = \ell' \wedge C_L \cap C'_L \neq \varnothing \Rightarrow C_L = C'_L
+\end{gather}
+$\conSet_L$ is said to be complete if
+\begin{equation}
+  \forall (\Gamma, \Delta) \in \axiomSet ,~ \forall \ell \in \Gamma ,~
+    \exists (C_L, \ell) \in \conSet_L ,~ (\Gamma, \Delta) \in C_L
+\end{equation}
+Right contractions are defined similarly, replacing condition \eqref{cond:ell_in_left} by
+\begin{equation}
+  \forall (C_R,\ell) \in \conSet_R ,~ (\Gamma, \Delta) \in C_R \Rightarrow \ell \in \Delta
+\tag{\ref{cond:ell_in_left}'}
+\end{equation}
+
+A set $\resoSet$ of resolutions is a relation from a set $\conSet_L$ of left contractions to a set
+$\conSet_R$ of right contractions on the same set $\axiomSet$ of axioms, ie $\resoSet \subseteq
+\conSet_L \times \conSet_R$, such that
+\begin{gather}
+  (C_L, \alpha_L) \resoSet (C_R, \alpha_R) \Rightarrow \alpha_L = \alpha_R \\
+  \forall C \in \conSet_L ,~ \exists D \in \conSet_R ,~ C \resoSet D
+    \label{cond:all_left_resolved} \\
+  \forall D \in \conSet_R ,~ \exists C \in \conSet_L ,~ C \resoSet D
+    \tag{\ref{cond:all_left_resolved}'}
+\end{gather}
+For each resolution $((C_L,\alpha),(C_R,\alpha)) \in \resoSet$, $\alpha$ is called the \emph{pivot}
+of the resolution.
+
+A \emph{resolution network} is a tuple $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$
+such that
+$\varSet$ is a finite set,
+$\axiomSet$ is a set of axioms on $\varSet$,
+$\conSet_L$ is a set of left contractions on $\axiomSet$,
+$\conSet_R$ is a set of right contractions on $\axiomSet$,
+$\resoSet$ is a set of resolutions from $\conSet_L$ to $\conSet_R$.
+
+A resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$
+is said to be \emph{well balanced} iff
+$
+  \card{\axiomSet} < \card{\conSet_L} + \card{\conSet_R} - \card{\resoSet}
+$
+
+A resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$
+is said to be \emph{initializable} iff $\forall A \in \axiomSet$, $\exists \alpha$ such that
+$(\{A\},\alpha) \in \conSet_L \cup \conSet_R$.
+
+The \emph{resolution graph} of 
+a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$
+is the graph
+in which vertices are the axioms in $\axiomSet$ and there is a edge between $A$ and $B$ labeled by a
+relation $((C_L,\alpha),(C_R,\alpha)) \in \resoSet$ iff 
+$
+  \left( A \in C_L \wedge B \in C_R \right) \vee
+  \left( A \in C_R \wedge B \in C_L \right)
+$.
+The resolution network is said to be \emph{connexe} if its resolution graph is.
+
+A connectivity path from $A$ to $B$ is a set of resolutions labeling a path in the
+resolution graph going from $A$ to $B$,
+traversing each node at most once and in which two consecutive edges are labeled with
+resolution having different pivots.
+The \emph{connectivity relation} of $\resoNet$ is the relation $\connected \subseteq \axiomSet
+\times \axiomSet$ such that $A \connected B$ iff there exists a connectivity path between $A$ and
+$B$. The set of connectivity paths from $A$ to $B$ (possibly empty) is denoted by $\cpath{A}{B}$.
+More precisely, for any $\alpha, \beta \in \varSet$ and any $A,B \in \axiomSet$, $A
+\conwith{\alpha}{\beta} B$ denotes the existence of a connectivity path with the resolution implying
+$A$ having $\alpha$ as pivot, and the one implying $B$ having $\beta$ as pivot. Similarly,
+$\cpathwith{A}{\alpha}{\beta}{B}$ denotes the set all those paths.
+
+Given a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet
+\rangle$, a total order $\resoOrd$ of $\resoSet$ is said to \emph{prevent tautologies} iff
+$\forall A=(\Gamma,\Delta), B=(\Gamma',\Delta') \in \axiomSet$ such that $\card{I} > 1$ with
+$I = \left( \Gamma \cap \Delta' \right) \cup \left( \Gamma' \cap \Delta \right)$,
+$\forall \alpha \in I$ such that $A \conwith{\alpha}{\alpha} B$,
+$\forall P \in \cpathwith{A}{\alpha}{\alpha}{B}$,
+$\exists R \in P$ s.t. $\forall \beta \in I \setminus \{\alpha\}$,
+$\exists R' = ((C_L,\beta),(C_R,\beta)) \in \resoSet$ such that
+$A \in C_L \cup C_R \vee B \in C_L \cup C_R$ and $R' \resoOrd R$.
+
+Given a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet
+\rangle$, a total order $\resoOrd$ of $\resoSet$ is said to \emph{prevent left splits} iff
+$\forall (C_L,\alpha) \in \conSet_L$, $\forall A, B \in C_L$ and
+$\forall R \in \resoSet$ such that $\exists C_R ,~ R = ((C_L,\alpha),(C_R,\alpha))$, then
+$\exists P \in \cpath{A}{B}$ such that $\forall R' \in P$, the pivot of $R'$ is
+not $\alpha$ and $R' \resoOrd R$.
+
+Given a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet
+\rangle$, a total order $\resoOrd$ of $\resoSet$ is said to \emph{prevent left merges} iff
+$\forall (C_L,\alpha), (C'_L,\alpha) \in \conSet_L$, $C_L \neq C'_L$ implies that
+$\forall (A,B) \in C_L \times C'_L$ and
+$\forall P \in \cpath{A}{B}$ such that $\alpha$ is not the pivot of any resolution in $P$, then
+$\exists R = ((C''_L,\alpha),(C_R,\alpha)) \in \resoSet$ such that
+$A \in C''_L \vee B \in C''_L$ and $\forall R' \in P$, $R \resoOrd R'$.
+
+Given a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet
+\rangle$, a total order $\resoOrd$ of $\resoSet$ is said to \emph{preserve left contractions} iff
+it prevent left splits and left merges. Similar definitions are given for total orders which prevent
+right splits or right merges, or which preserve right contractions.
+
+A resolution network $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ is
+\emph{shrinkable} iff it is well balanced, initializable, connexe and a total ordering of
+$\axiomSet$ which prevents tautologies and preserves left and right contractions exists.
+
+A resolution network $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ is
+\emph{totally shrinkable} iff it is shrinkable and both $\conSet_L$ and $\conSet_R$ are complete.
+
+
+
+
+
+\section{Correspondance with usual DAG proofs}
+
+In the following we consider that proofs are DAGified in the sense that in any given proofs two
+distinct subproofs which are structuraly identical can not be found.
+
+
+
+\subsection{From DAG to TSRN}
+
+Let $\Proof$ be a Proof of unsatifiability of a set $\axiomSet$ of clauses on the set $\varSet$ of
+variables. We consider the Proof to be a DAG with vertice labeled with conclusion clause, edges to
+be directed from the premises to the resolvent and labeled with the only literal wich appears in the
+premise's conclusion but not in the resolvent's. The conclusion of a node $\node$ from $\Proof$ is
+denoted $\conc{\node}$ and is represented like the axioms of the previous section.
+
+A node $\node'$ is \emph{reachable without a literal $\ell$} from a node $\node$, denoted by
+$\nreach{\node}{\ell}{\node'}$, iff there is a (possibly empty) path in $\Proof$ from $\node$ to
+$\node'$ on which no edge is labeled with $\ell$.
+A node $\node'$ is \emph{reachable with a terminal literal $\ell$} from another node $\node$, noted
+$\treach{\node}{\ell}{\node'}$, iff $\exists \node''$ s.t. $\nreach{\node}{\ell}{\node''}$ and there
+is an edge labeled with $\ell$ from $\node''$ to $\node'$.
+
+For each $\alpha \in \varSet$, let $A_\alpha^L = \ens{(\Gamma,\Delta) \in \axiomSet}{\alpha \in \Gamma}$
+and $R_\alpha^L \subseteq A_\alpha^L \times A_\alpha^L$ a relation such that
+\begin{align*}
+  (\Gamma,\Delta) R_\alpha^L (\Gamma', \Delta') \Longleftrightarrow \exists \node,\node',\node'',~
+    & \node  \text{ is a leaf and } \conc{\node}  = (\Gamma,  \Delta)  &\wedge \\
+    & \node' \text{ is a leaf and } \conc{\node'} = (\Gamma', \Delta') &\wedge \\
+    & \nreach{\node} {\dual{\alpha}}{\node''} &\wedge \\
+    & \nreach{\node'}{\dual{\alpha}}{\node''} &
+\end{align*}
+$R_\alpha^L$ is obviously reflexive and symmetric (but not transitive). Nevertheless, some kind of
+quotient can be constructed in the following way
+\begin{align*}
+  P_\alpha^L &=
+    \ens{X \subseteq A_\alpha^L}
+        {\forall (\Gamma,\Delta),(\Gamma',\Delta') \in X ,~
+          (\Gamma,\Delta) R_\alpha^L (\Gamma',\Delta')} \\
+  \text{ and }
+  Q_\alpha^L &= \ens{X \in P_\alpha^L}{\forall Y \in P_\alpha^L ,~ X \not\subset Y}
+\end{align*}
+The complete set of left contractions can now be defined as
+$$ \conSet_L = \ens{(X,\alpha)}{\alpha \in \varSet \wedge X \in Q_\alpha^L} $$
+The complete set $\conSet_R$ of right contractions is defined similarly.
+
+The resolution relation $\resoSet$ between $\conSet_L$ and $\conSet_R$ is defined such that
+$(C_L,\alpha) \resoSet (C_R,\alpha)$ iff
+$$
+  \exists \node ~,
+    \left( \forall \node' \text{ s.t. } \conc{\node'} \in C_L ,~
+              \treach{\node'}{\dual{\alpha}}{\node} \right) \wedge
+    \left( \forall \node' \text{ s.t. } \conc{\node'} \in C_R ,~
+              \treach{\node'}{\alpha}{\node} \right)
+$$
+
+\begin{claim}
+The tuple $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ as defined above is a
+totally shrinkable resolution network.
+\end{claim}
+
+
+
+\subsection{From TSRN to DAG}
+
+Given a set $\varSet$ of variables, let $\mathbb{A} = \parts{\varSet} \times \parts{\varSet}$. The
+resolution operator $\reso{}$ on $\mathbb{A}$ is the partial function from $\mathbb{A} \times \varSet
+\times \mathbb{A}$ to $\mathbb{A}$ defined as
+$$
+  (\Gamma,\Delta) \reso{\alpha} (\Gamma',\Delta') =
+    (\Gamma \cup (\Gamma' \setminus \{\alpha\}),
+     (\Delta \setminus \{\alpha\}) \cup \Delta')
+  \text{ if } \alpha \in \Delta \wedge \alpha \in \Gamma'
+$$
+
+Given a resolution network $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$, 
+the connectivity of $A \in \axiomSet$ w.r.t. a variable $\alpha \in \varSet$ in $\resoSet$, denoted
+by $\ncon{A}{\alpha}{\resoSet}$ is the cardinal of
+$$\ens{((C_L,\alpha),(C_R,\alpha)) \in \resoSet}{A \in C_L \cup C_R}$$
+
+We define a labeled transition system between resolution network and labeled with resolutions: $
+\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle \transition{R}
+\langle \varSet, \axiomSet', \conSet_L', \conSet_R', \resoSet' \rangle
+$ iff
+\begin{gather}
+R \in \resoSet \\
+R = \left( (\{(\Gamma,\Delta)\},\alpha), (\{(\Gamma',\Delta')\},\alpha) \right) \in \resoSet \\
+\resoSet' = \resoSet \setminus \{ R \} 
+\shortintertext{For the remaining condition it is convenient to define the new axiom}
+N = ((\Gamma \cup \Gamma') \setminus \{\alpha\}, (\Delta \cup \Delta') \setminus \{\alpha\})
+\notag \\
+\forall (C_L,\beta) \in \conSet_L ,~
+\begin{cases}
+  \text{either}   & C_L = \{A\} \wedge \beta = \alpha \\
+  \text{or else } & A \notin C_L \wedge (C_L,\beta) \in \conSet_L' \\
+  \text{or else } & \ncon{A}{\alpha}{\resoSet} = 1 \wedge
+    (C_L \setminus \{A\} \cup \{N\}, \beta) \in \conSet_L' \\
+  \text{or else } & \ncon{A}{\beta}{\resoSet} = 1 \wedge
+    (C_L \cup \{N\}, \beta) \in \conSet_L' \\
+  \text{or else } & (C_L \setminus \{A\} \cup \{N\}, \beta) \in \conSet_L' \\
+  \text{or else } & (C_L, \beta) \in \conSet_L' \\
+\end{cases}
+%\conSet_L' = \ens{(C_L,\beta) \in \conSet_L}{flu}
+%                 {\exists (C_R,\beta) ,~ ((C_L,\beta),(C_R,\beta)) \in \resoSet' \\
+%\conSet_L' = \ens{(C_L,\beta) \in \conSet_L}
+%                 {\exists (C_R,\beta) ,~ ((C_L,\beta),(C_R,\beta)) \in \resoSet' \\
+\end{gather}
+
+
+\section{Garbage}
+
+Let $\Proof$ be a Proof of unsatifiability of a set $\axiomSet$ of clauses on the set $\varSet$ of
+variables. We write $\conc{\node}$ the conclusion of the node $\node$ (using the same representation
+as for axioms in the previous section).
+
+The fonction $f$ on nodes of $\Proof$ is defined by induction as \begin{itemize}
+  \item if $\node$ is an axiom $\conc{\node} = (\Gamma, \Delta) \in \axiomSet$, then
+    $$f(\node) = \langle \varSet, \left\{ (\Gamma, \Delta) \right\},
+                        \ens{\left(\left\{(\Gamma, \Delta)\right\}, \ell\right)}{\ell \in \Gamma},
+                        \ens{\left(\left\{(\Gamma, \Delta)\right\}, \ell\right)}{\ell \in \Delta},
+                        \varnothing \rangle$$
+  \item if $\node$ is the resolution on pivot $\ell \in \varSet$ of $\node^L$ and $\node^R$, given
+  that
+  \begin{align*}
+    f(\node^L) &= \langle \varSet, \axiomSet^L, \conSet_L^L, \conSet_R^L, \resoSet^L \rangle \\
+    f(\node^R) &= \langle \varSet, \axiomSet^R, \conSet_L^R, \conSet_R^R, \resoSet^R \rangle \\
+    \text{ and }
+    \conc{\node} &= (\Gamma, \Delta)
+  \end{align*}
+  and assuming that
+  \begin{gather}
+    \exists! C^L ,~ (C^L,\ell) \in \conSet_R^L \label{cond:uniq_left_contraction} \\
+    \exists! C^R ,~ (C^R,\ell) \in \conSet_L^R \tag{\ref{cond:uniq_left_contraction}'}
+  \end{gather}
+  we define
+\end{itemize}
+
+
+\end{document}
+
+% vim: tw=100
