@@ -1,5 +1,8 @@
 \documentclass{article}
 
+\usepackage{xcolor}
+\newenvironment{comment}{\color{teal}}{}
+
 \usepackage{mathtools,amssymb,amsthm}
 
 \newtheorem{claim}{Claim}
@@ -20,17 +23,19 @@
 \newcommand{\cpath}[2]{\left[ #1 \connected #2 \right]}
 \newcommand{\conwith}[2]{\prescript{#1}{}{\connected}^{#2}}
 \newcommand{\cpathwith}[4]{\left[ #1 \conwith{#2}{#3} #4 \right]}
+\newcommand{\nConclusion}[1]{C(#1)} %TODO
 
 \newcommand{\Proof}{\varphi}
 \newcommand{\node}{\eta}
-\newcommand{\conc}[1]{C\left(#1\right)}
+\newcommand{\pConclusion}[1]{C\left(#1\right)} %TODO
 \newcommand{\dual}[1]{\overline{#1}}
 \newcommand{\nreach}[3]{#1 \overset{#2}{\nrightarrow} #3}
 \newcommand{\treach}[3]{#1 \twoheadrightarrow^{#2} #3}
 
 \newcommand{\reso}[1]{\odot_{#1}}
 \newcommand{\transition}[1]{\xrightarrow{#1}}
-\newcommand{\ncon}[3]{M_{#3} \left( #1 , #2 \right)}
+\newcommand{\connectivity}[3]{M_{#3} \left( #1 , #2 \right)}
+\newcommand{\transitRel}[4]{\underset{#1}{\xrightharpoondown{#2,#3,#4}}}
 
 
 \begin{document}
@@ -45,6 +50,11 @@ ie $\axiomSet \subseteq \parts{\varSet} \times \parts{\varSet}$. In the followin
   \left(\Gamma, \Delta \right) \in \axiomSet \Rightarrow \Gamma \cap \Delta = \varnothing \\
   (\varnothing, \varnothing) \notin \axiomSet
 \end{gather}
+
+\begin{comment}In fact we need a collection (ie a multiset with identified elements) and the axioms
+  should be a function from a finite set to $\ens{(\Gamma,\Delta) \in \parts{\varSet} \times
+  \parts{\varSet}}{\Gamma \cap \Delta = \varnothing}$.
+\end{comment}
 
 A set $\conSet_L$ of left contractions on a set $\axiomSet$ of axioms on $\varSet$ is a relation
 between parts of $\axiomSet$ and $\varSet$, ie $\conSet_L \subseteq \parts{\axiomSet} \times
@@ -150,9 +160,18 @@ Given a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \c
 it prevent left splits and left merges. Similar definitions are given for total orders which prevent
 right splits or right merges, or which preserve right contractions.
 
-A resolution network $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ is
-\emph{shrinkable} iff it is well balanced, initializable, connexe and a total ordering of
-$\axiomSet$ which prevents tautologies and preserves left and right contractions exists.
+A resolution network $\rho = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ is
+\emph{shrinkable} iff it is well balanced, initializable, connexe and a total ordering $\resoOrd$ of
+$\resoSet$ which prevents tautologies and preserves left and right contractions exists. The relation
+$\resoOrd$ is called a shrinking order of $\rho$.
+
+The conclusion of a resolution network $\rho = \langle \varSet, \axiomSet, \conSet_L, \conSet_R,
+\resoSet \rangle$, denoted by $\nConclusion{\rho}$, is the axiom
+\begin{multline*}
+(\ens{\alpha \in \varSet}{\exists A = (\Gamma,\Delta) \in \axiomSet ,~ \alpha \in \Gamma \wedge
+\connectivity{A}{\alpha}{\resoSet} = 0}, \\
+ \ens{\alpha \in \varSet}{\exists A = (\Gamma,\Delta) \in \axiomSet ,~ \alpha \in \Delta \wedge \connectivity{A}{\alpha}{\resoSet} = 0})
+\end{multline*}
 
 A resolution network $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ is
 \emph{totally shrinkable} iff it is shrinkable and both $\conSet_L$ and $\conSet_R$ are complete.
@@ -174,7 +193,7 @@ Let $\Proof$ be a Proof of unsatifiability of a set $\axiomSet$ of clauses on th
 variables. We consider the Proof to be a DAG with vertice labeled with conclusion clause, edges to
 be directed from the premises to the resolvent and labeled with the only literal wich appears in the
 premise's conclusion but not in the resolvent's. The conclusion of a node $\node$ from $\Proof$ is
-denoted $\conc{\node}$ and is represented like the axioms of the previous section.
+denoted $\pConclusion{\node}$ and is represented like the axioms of the previous section.
 
 A node $\node'$ is \emph{reachable without a literal $\ell$} from a node $\node$, denoted by
 $\nreach{\node}{\ell}{\node'}$, iff there is a (possibly empty) path in $\Proof$ from $\node$ to
@@ -187,8 +206,8 @@ For each $\alpha \in \varSet$, let $A_\alpha^L = \ens{(\Gamma,\Delta) \in \axiom
 and $R_\alpha^L \subseteq A_\alpha^L \times A_\alpha^L$ a relation such that
 \begin{align*}
   (\Gamma,\Delta) R_\alpha^L (\Gamma', \Delta') \Longleftrightarrow \exists \node,\node',\node'',~
-    & \node  \text{ is a leaf and } \conc{\node}  = (\Gamma,  \Delta)  &\wedge \\
-    & \node' \text{ is a leaf and } \conc{\node'} = (\Gamma', \Delta') &\wedge \\
+    & \node  \text{ is a leaf and } \pConclusion{\node}  = (\Gamma,  \Delta)  &\wedge \\
+    & \node' \text{ is a leaf and } \pConclusion{\node'} = (\Gamma', \Delta') &\wedge \\
     & \nreach{\node} {\dual{\alpha}}{\node''} &\wedge \\
     & \nreach{\node'}{\dual{\alpha}}{\node''} &
 \end{align*}
@@ -210,9 +229,9 @@ The resolution relation $\resoSet$ between $\conSet_L$ and $\conSet_R$ is define
 $(C_L,\alpha) \resoSet (C_R,\alpha)$ iff
 $$
   \exists \node ~,
-    \left( \forall \node' \text{ s.t. } \conc{\node'} \in C_L ,~
+    \left( \forall \node' \text{ s.t. } \pConclusion{\node'} \in C_L ,~
               \treach{\node'}{\dual{\alpha}}{\node} \right) \wedge
-    \left( \forall \node' \text{ s.t. } \conc{\node'} \in C_R ,~
+    \left( \forall \node' \text{ s.t. } \pConclusion{\node'} \in C_R ,~
               \treach{\node'}{\alpha}{\node} \right)
 $$
 
@@ -221,6 +240,9 @@ The tuple $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$ a
 totally shrinkable resolution network.
 \end{claim}
 
+\begin{comment} Add the fact that the resolution network is \emph{prime}, ie $\axiomSet$ as a function is
+  injective.
+\end{comment}
 
 
 \subsection{From TSRN to DAG}
@@ -230,15 +252,72 @@ resolution operator $\reso{}$ on $\mathbb{A}$ is the partial function from $\mat
 \times \mathbb{A}$ to $\mathbb{A}$ defined as
 $$
   (\Gamma,\Delta) \reso{\alpha} (\Gamma',\Delta') =
-    (\Gamma \cup (\Gamma' \setminus \{\alpha\}),
-     (\Delta \setminus \{\alpha\}) \cup \Delta')
-  \text{ if } \alpha \in \Delta \wedge \alpha \in \Gamma'
+    ((\Gamma \setminus \{\alpha\}) \cup \Gamma',
+     \Delta \cup (\Delta' \setminus \{\alpha\}))
+  \text{ if } \alpha \in \Gamma \wedge \alpha \in \Delta'
 $$
 
 Given a resolution network $\langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle$, 
 the connectivity of $A \in \axiomSet$ w.r.t. a variable $\alpha \in \varSet$ in $\resoSet$, denoted
-by $\ncon{A}{\alpha}{\resoSet}$ is the cardinal of
+by $\connectivity{A}{\alpha}{\resoSet}$ is the cardinal of
 $$\ens{((C_L,\alpha),(C_R,\alpha)) \in \resoSet}{A \in C_L \cup C_R}$$
+
+Given two resolution networks $\rho = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet
+\rangle$ and $\rho' = \langle \varSet, \axiomSet', \conSet_L', \conSet_R', \resoSet' \rangle$, for
+any $R = ((\{A\},\alpha),(\{B\},\alpha)) \in \resoSet$, the relation
+$\transitRel{L}{\rho}{R}{\rho'}$ between $\conSet_L$ and $\conSet_L'$ is defined such that
+$(C_L,\beta) \transitRel{L}{\rho}{R}{\rho'} (C_L', \beta')$ iff $\beta = \beta'$
+and the following conditions holds
+\begin{subequations}
+\begin{equation}
+C_L \setminus \{A,B\} \subseteq C_L' \subseteq C_L \cup \{ A \reso{\alpha} B \}
+\end{equation}\vspace{-1.7em}
+  \newcommand{\pA}{A \in C_L}
+  \newcommand{\nA}{A \notin C_L}
+  \newcommand{\pB}{\connectivity{A}{\alpha}{\resoSet} > 1}
+  \newcommand{\nB}{\connectivity{A}{\alpha}{\resoSet} = 1}
+  \newcommand{\pC}{\connectivity{A}{\beta}{\resoSet} > 1}
+  \newcommand{\pD}{B \in C_L}
+  \newcommand{\nD}{B \notin C_L}
+  \newcommand{\pE}{\connectivity{B}{\alpha}{\resoSet} > 1}
+  \newcommand{\nE}{\connectivity{B}{\alpha}{\resoSet} = 1}
+  \newcommand{\pF}{\connectivity{B}{\beta}{\resoSet} > 1}
+  \newcommand{\pG}{A \in C_L'}
+  \newcommand{\nG}{A \notin C_L'}
+  \newcommand{\pH}{B \in C_L'}
+  \newcommand{\nH}{B \notin C_L'}
+  \newcommand{\pI}{A \reso{\alpha} B \in C_L'}
+  \newcommand{\nI}{A \reso{\alpha} B \notin C_L'}
+\begin{align}
+  \pG &\Rightarrow
+    \pB& \\
+  \pH &\Rightarrow
+    \pE& \\
+  \pI &\Rightarrow
+    \pA \vee \pD& \\
+  \nG &\Rightarrow
+    \nA \vee \nB& \vee \notag \\
+    &\quad \left( \pH \wedge \pF \right)& \vee \\
+    &\quad \left( \pI \wedge \pC \right)& \notag \\
+  \nH &\Rightarrow
+    \nD \vee \nE& \vee \notag \\
+    &\quad \left( \pG \wedge \pC \right)& \vee \\
+    &\quad \left( \pI \wedge \pF \right)& \notag \\
+  \nI &\Rightarrow
+    \left( \nA \wedge \nD \right)& \vee \notag \\
+    &\quad \left( \pG \wedge \pC \right)& \vee \\
+    &\quad \left( \pH \wedge \pF \right)& \notag
+\end{align}
+\end{subequations}
+The relation $\transitRel{R}{\rho}{R}{\rho'}$ is defined similarly between $\conSet_R$ and
+$\conSet_R'$.
+The relation $\transitRel{\odot}{\rho}{R}{\rho'}$ between $\resoSet$ and $\resoSet'$ is defined such
+that $((C_L, \beta), (C_R, \beta)) \transitRel{\odot}{\rho}{R}{\rho'}
+((C_L', \beta'), (C_R', \beta'))$ iff
+\begin{equation}
+  (C_L, \beta) \transitRel{L}{\rho}{R}{\rho'} (C_L', \beta') \wedge
+  (C_R, \beta) \transitRel{R}{\rho}{R}{\rho'} (C_R', \beta')
+\end{equation}
 
 We define a labeled transition system between resolution network and labeled with resolutions: $
 \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet \rangle \transition{R}
@@ -246,37 +325,76 @@ We define a labeled transition system between resolution network and labeled wit
 $ iff
 \begin{gather}
 R \in \resoSet \\
-R = \left( (\{(\Gamma,\Delta)\},\alpha), (\{(\Gamma',\Delta')\},\alpha) \right) \in \resoSet \\
-\resoSet' = \resoSet \setminus \{ R \} 
-\shortintertext{For the remaining condition it is convenient to define the new axiom}
-N = ((\Gamma \cup \Gamma') \setminus \{\alpha\}, (\Delta \cup \Delta') \setminus \{\alpha\})
-\notag \\
-\forall (C_L,\beta) \in \conSet_L ,~
-\begin{cases}
-  \text{either}   & C_L = \{A\} \wedge \beta = \alpha \\
-  \text{or else } & A \notin C_L \wedge (C_L,\beta) \in \conSet_L' \\
-  \text{or else } & \ncon{A}{\alpha}{\resoSet} = 1 \wedge
-    (C_L \setminus \{A\} \cup \{N\}, \beta) \in \conSet_L' \\
-  \text{or else } & \ncon{A}{\beta}{\resoSet} = 1 \wedge
-    (C_L \cup \{N\}, \beta) \in \conSet_L' \\
-  \text{or else } & (C_L \setminus \{A\} \cup \{N\}, \beta) \in \conSet_L' \\
-  \text{or else } & (C_L, \beta) \in \conSet_L' \\
-\end{cases}
-%\conSet_L' = \ens{(C_L,\beta) \in \conSet_L}{flu}
-%                 {\exists (C_R,\beta) ,~ ((C_L,\beta),(C_R,\beta)) \in \resoSet' \\
-%\conSet_L' = \ens{(C_L,\beta) \in \conSet_L}
-%                 {\exists (C_R,\beta) ,~ ((C_L,\beta),(C_R,\beta)) \in \resoSet' \\
+R = \left( (\{A\},\alpha), (\{B\},\alpha) \right) \\
+\axiomSet' = \begin{cases}
+  \axiomSet \cup \{ A \reso{\alpha} B \} \setminus \{ A, B \}
+    & \text{ if } \connectivity{A}{\alpha}{\resoSet} = 1 \wedge \connectivity{B}{\alpha}{\resoSet} = 1 \\
+  \axiomSet \cup \{ A \reso{\alpha} B \} \setminus \{ B \}
+    & \text{ if } \connectivity{A}{\alpha}{\resoSet} > 1 \wedge \connectivity{B}{\alpha}{\resoSet} = 1 \\
+  \axiomSet \cup \{ A \reso{\alpha} B \} \setminus \{ A \}
+    & \text{ if } \connectivity{A}{\alpha}{\resoSet} = 1 \wedge \connectivity{B}{\alpha}{\resoSet} > 1 \\
+  \axiomSet \cup \{ A \reso{\alpha} B \}
+    & \text{ if } \connectivity{A}{\alpha}{\resoSet} > 1 \wedge \connectivity{B}{\alpha}{\resoSet} > 1
+  \end{cases} \\
+  \transitRel{\odot}{\rho}{R}{\rho'} \text{ is a partial bijection defined on }
+    \resoSet \setminus \{ R \} \\
+  \nConclusion{\rho} = \nConclusion{\rho'}
 \end{gather}
+
+\begin{claim}If $\rho$ is a shrinkable resolution network with shrinking order $\resoOrd$ and $R$ is
+  the smaller resolution w.r.t. $\resoOrd$, then a resolution network $\rho'$ exists such
+  that $\rho \transition{R} \rho'$ and the relation $\resoOrd'$ defined as
+  $$ R'_a \resoOrd' R'_b \Leftrightarrow
+      R_a \resoOrd R_b \wedge
+      R_a \transitRel{\odot}{\rho}{R}{\rho'} R'_a \wedge
+      R_b \transitRel{\odot}{\rho}{R}{\rho'} R'_b
+  $$ is a shrinking order of $\rho'$.
+\end{claim}
+  
 
 
 \section{Garbage}
 
+\begin{align}
+  A \notin C_L
+    &\wedge C_L' = C_L \\
+  \connectivity{A}{\alpha}{\resoSet} = 1 \wedge A \in C_L
+    &\wedge C_L' = C_L \cup \{ A \reso{\alpha} B \} \setminus \{ A \} \\
+  \connectivity{A}{\alpha}{\resoSet} > 1 \wedge \connectivity{A}{\beta}{\resoSet} = 1 \wedge A \in C_L
+    &\wedge C_L' = C_L \cup \{ A \reso{\alpha} B \} \\
+  \connectivity{A}{\alpha}{\resoSet} > 1 \wedge \connectivity{A}{\beta}{\resoSet} > 1 \wedge A \in C_L
+    &\wedge C_L' = C_L \\
+  \connectivity{A}{\alpha}{\resoSet} > 1 \wedge \connectivity{A}{\beta}{\resoSet} > 1 \wedge A \in C_L
+    &\wedge C_L' = C_L \cup \{ A \reso{\alpha} B \} \setminus \{ A \}
+\end{align}
+
+\begin{gather}
+\forall (C_L,\beta) \in \conSet_L ,~
+\begin{cases}
+  \text{either}   & C_L = \{A\} \wedge \beta = \alpha \\
+  \text{or else } & A \notin C_L \wedge (C_L,\beta) \in \conSet_L' \\
+  \text{or else } & \connectivity{A}{\alpha}{\resoSet} = 1 \wedge
+    (C_L \setminus \{A\} \cup \{N\}, \beta) \in \conSet_L' \\
+  \text{or else } & \connectivity{A}{\beta}{\resoSet} = 1 \wedge
+    (C_L \cup \{N\}, \beta) \in \conSet_L' \\
+  \text{or else } & (C_L \setminus \{A\} \cup \{N\}, \beta) \in \conSet_L' \\
+  \text{or else } & (C_L, \beta) \in \conSet_L' \\
+\end{cases} \\
+\shortintertext{For the remaining condition it is convenient to define the new axiom}
+N = ((\Gamma \cup \Gamma') \setminus \{\alpha\}, (\Delta \cup \Delta') \setminus \{\alpha\})
+\notag \\
+\conSet_L' = \ens{(C_L,\beta) \in \conSet_L}{flu}
+{\exists (C_R,\beta) ,~ ((C_L,\beta),(C_R,\beta)) \in \resoSet'} \\
+\conSet_L' = \ens{(C_L,\beta) \in \conSet_L}
+{\exists (C_R,\beta) ,~ ((C_L,\beta),(C_R,\beta)) \in \resoSet'}
+\end{gather}
+
 Let $\Proof$ be a Proof of unsatifiability of a set $\axiomSet$ of clauses on the set $\varSet$ of
-variables. We write $\conc{\node}$ the conclusion of the node $\node$ (using the same representation
+variables. We write $\pConclusion{\node}$ the conclusion of the node $\node$ (using the same representation
 as for axioms in the previous section).
 
 The fonction $f$ on nodes of $\Proof$ is defined by induction as \begin{itemize}
-  \item if $\node$ is an axiom $\conc{\node} = (\Gamma, \Delta) \in \axiomSet$, then
+  \item if $\node$ is an axiom $\pConclusion{\node} = (\Gamma, \Delta) \in \axiomSet$, then
     $$f(\node) = \langle \varSet, \left\{ (\Gamma, \Delta) \right\},
                         \ens{\left(\left\{(\Gamma, \Delta)\right\}, \ell\right)}{\ell \in \Gamma},
                         \ens{\left(\left\{(\Gamma, \Delta)\right\}, \ell\right)}{\ell \in \Delta},
@@ -287,7 +405,7 @@ The fonction $f$ on nodes of $\Proof$ is defined by induction as \begin{itemize}
     f(\node^L) &= \langle \varSet, \axiomSet^L, \conSet_L^L, \conSet_R^L, \resoSet^L \rangle \\
     f(\node^R) &= \langle \varSet, \axiomSet^R, \conSet_L^R, \conSet_R^R, \resoSet^R \rangle \\
     \text{ and }
-    \conc{\node} &= (\Gamma, \Delta)
+    \pConclusion{\node} &= (\Gamma, \Delta)
   \end{align*}
   and assuming that
   \begin{gather}
