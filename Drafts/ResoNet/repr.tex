@@ -140,6 +140,12 @@ $\exists R \in P$ s.t. $\forall \beta \in I \setminus \{\alpha\}$,
 $\exists R' = ((C_L,\beta),(C_R,\beta)) \in \resoSet$ such that
 $A \in C_L \cup C_R \vee B \in C_L \cup C_R$ and $R' \resoOrd R$.
 
+\begin{comment}
+  For tautologies, add the condition that all $\beta$s don't appear as pivot in $P$. In fact the
+  condition may be even more complicated (because of add/remove). Note too that the (last)
+  disjunction must be exclusive.
+\end{comment}
+
 Given a resolution network $\resoNet = \langle \varSet, \axiomSet, \conSet_L, \conSet_R, \resoSet
 \rangle$, a total order $\resoOrd$ of $\resoSet$ is said to \emph{prevent left splits} iff
 $\forall (C_L,\alpha) \in \conSet_L$, $\forall A, B \in C_L$ and
